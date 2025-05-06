@@ -44,7 +44,7 @@ if (!cloud_response||cloud_response.error){
 };
 
 
-import mongoose from "mongoose";
+
 
 export const updataCourse = async (req, res) => {
   const { courseId } = req.params; // Get courseId from URL params
@@ -83,3 +83,20 @@ export const updataCourse = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// delete api
+
+export const deleteCourse = async (req,res)=>{
+  const {courseId} = req.params
+ try {
+  const course = await Course.findOneAndDelete({_id:courseId},)
+  if(!course){
+    res.status(404).json({message:"course is not found"})
+  }
+  res.status(202).json({message:"course is delete successfully"})
+
+ } catch (error) {
+  console.log(error);
+  console.log("error occur",error);
+  
+ }}
