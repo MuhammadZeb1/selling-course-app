@@ -1,4 +1,5 @@
 import Course from '../models/courseModels.js';
+import { v2 as cloudinary } from 'cloudinary';
 
 export const createCourse = async (req, res) => {
   const { title, description, price,  } = req.body;
@@ -20,9 +21,13 @@ export const createCourse = async (req, res) => {
 if (!allowedTypes.includes(image.mimetype)) {
   return res.status(400).json({ message: 'Only JPEG and PNG images are allowed!' });
 }
+const cloud_response = await cloudinary.uploader.upload(image.tempFilePath)
+if (!cloud_response||cloud_response.error){
+  return res.status(400).json({error:"error file uploading cloudery"})
+}
 
 
-    const newCourse = new Course({ title, description, price, image });
+    const newCourse = new Course({ title, description, price, image:{public_id:cloud_response.public_id,url:cloud_response.url} });
     await newCourse.save();
 
     res.status(201).json({

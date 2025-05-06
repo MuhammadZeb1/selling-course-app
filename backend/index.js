@@ -1,19 +1,15 @@
-// 1. Express کو import کریں
 import express from "express";
 import dotenv from 'dotenv';
 import mongoose from "mongoose";
 import courseRoute from './routes/courseRoutes.js'
 import fileUpload from "express-fileupload";
+import { v2 as cloudinary } from 'cloudinary';
 
-// 2. Express کا app initialize کریں
+
 dotenv.config();
 const app = express();
-app.use(express.json()); // ہونا ضروری ہے!
+app.use(express.json()); 
 
-app.use(fileUpload({
-  useTempFiles : true,
-  tempFileDir : '/tmp/'
-}));
 const PORT = process.env.PORT || 5000;
 
 const dataBasa = process.env.DATABASE_URI
@@ -33,13 +29,22 @@ const connectDB = async () => {
 
 // Call the function to connect
 connectDB();
+app.use(fileUpload({
+  useTempFiles : true,
+  tempFileDir : '/tmp/'
+}));
 
 app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 app.use("/api/v1/course",courseRoute)
+// cludnery config file
+cloudinary.config({ 
+  cloud_name: process.env.CLOUD_NAME, 
+  api_key: process.env.API_KEY, 
+  api_secret: process.env.API_SECRET 
+});
 
-// 5. Server کو listen کروائیں
 app.listen(3000, () => {
   console.log(`Server is running on http://localhost:${3000}`);
 });
