@@ -91,12 +91,40 @@ export const deleteCourse = async (req,res)=>{
  try {
   const course = await Course.findOneAndDelete({_id:courseId},)
   if(!course){
-    res.status(404).json({message:"course is not found"})
+   return res.status(404).json({message:"course is not found"})
   }
   res.status(202).json({message:"course is delete successfully"})
 
  } catch (error) {
   console.log(error);
   console.log("error occur",error);
-  
+  res.status(500).json({ message: "Internal server error" });
  }}
+
+
+ export const getCourse = async (req,res)=>{
+  try {
+    const courses = await Course.find()
+
+    res.status(201).json({courses})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+ }
+
+
+ export const courseDetail = async (req,res)=>{
+  const {courseId}=req.params;
+
+  try {
+    const course = await Course.findById(courseId)
+    if (!course){
+     return res.status(401).json({message:"course not found"})
+    }
+    res.status(201).json({course})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+ }
