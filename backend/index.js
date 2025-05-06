@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from 'dotenv';
 import mongoose from "mongoose";
 import courseRoute from './routes/courseRoutes.js'
+import userRoute from './routes/userRouter.js'
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -38,6 +39,7 @@ app.get('/', (req, res) => {
   res.send('Server is running!');
 });
 app.use("/api/v1/course",courseRoute)
+app.use("/api/v1/user",userRoute)
 // cludnery config file
 cloudinary.config({ 
   cloud_name: process.env.CLOUD_NAME, 
