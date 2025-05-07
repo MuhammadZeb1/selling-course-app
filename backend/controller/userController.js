@@ -54,7 +54,7 @@ export const login = async (req, res) => {
       { id: userAvailable._id },
       process.env.USER_PASSWORD  // ✅ یہ درست ہے
     );
-    
+    res.cookie("jwt",token)
     
     res.status(201).json({message:"login successfully",userAvailable,token})
   } catch (error) {
