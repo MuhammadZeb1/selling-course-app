@@ -1,6 +1,9 @@
 import user from "../models/userModel.js";
 import bcrypt ,{hash}from "bcryptjs";
 import { z } from "zod";
+import jwt from 'jsonwebtoken'
+import { config } from "dotenv";
+config()
 
 
 export const singup = async (req, res) => {
@@ -43,10 +46,17 @@ export const login = async (req, res) => {
   try {
     const userAvailable = await user.findOne({ email: email });
     const hashPassowrdComp = await bcrypt.compare(password,userAvailable.password)
-    if (!userAvailable) {
+    if (!userAvailable ||!hashPassowrdComp) {
       return res.status(403).json({ errors: "invalid credentials" });
     }
-    res.status(201).json({message:"login successfully",user})
+    // jwt code 
+    const token = jwt.sign(
+      { id: userAvailable._id },
+      process.env.USER_PASSWORD  // ✅ یہ درست ہے
+    );
+    
+    
+    res.status(201).json({message:"login successfully",userAvailable,token})
   } catch (error) {
     res.status(500).json({ error: "error in login" });
     console.log(error);
