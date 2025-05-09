@@ -3,6 +3,8 @@ import bcrypt ,{hash}from "bcryptjs";
 import { z } from "zod";
 import jwt from 'jsonwebtoken'
 import { config } from "dotenv";
+import Purchase from "../models/purchaseModel.js";
+import Course from "../models/courseModels.js";
 config()
 
 
@@ -72,4 +74,24 @@ export const logout = (req,res)=>{
   console.log(error);
   
  }
+}
+
+export const purchases =async (req,res )=>{
+  const userId = req.userId;
+  try {
+    const purchase = await Purchase.find()
+    let purchaseCourseId=[]
+    for (let i = 0;i<purchaseCourseId.length;i++){
+      purchaseCourseId.push(purchase[i].userId)
+    }
+    const courseData = await Course.find({
+      _id:{$in:purchaseCourseId},
+    })
+    res.status(200).json({purchase,courseData})
+  } catch (error) {
+    res.status()
+    console.log(error);
+    
+  }
+
 }
