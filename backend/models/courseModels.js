@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import User from "./userModel.js";
 
 const courseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -11,6 +12,10 @@ const courseSchema = new mongoose.Schema({
     url:{
       type: String, required: true 
     }
+  },
+  createrId:{
+    type:mongoose.Types.ObjectId,
+    ref:User
   }
 });
 

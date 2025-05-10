@@ -1,8 +1,10 @@
 import Course from '../models/courseModels.js';
+import user from '../models/userModel.js'
 import Purchase from '../models/purchaseModel.js';
 import { v2 as cloudinary } from 'cloudinary';
 
 export const createCourse = async (req, res) => {
+  const adminId = req.adminId
   const { title, description, price,  } = req.body;
   const {image} = req.files
   console.log("📦 req.body:", req.body);
@@ -30,7 +32,10 @@ if (!cloud_response||cloud_response.error){
 }
 
 
-    const newCourse = new Course({ title, description, price, image:{public_id:cloud_response.public_id,url:cloud_response.url} });
+    const newCourse = new Course({
+       title, description, price, image:{public_id:cloud_response.public_id,url:cloud_response.url},
+       createrId:adminId
+       });
     await newCourse.save();
 
     res.status(201).json({
@@ -48,6 +53,7 @@ if (!cloud_response||cloud_response.error){
 
 
 export const updataCourse = async (req, res) => {
+  const admin = req.adminId
   const { courseId } = req.params; // Get courseId from URL params
   const { title, description, price, image } = req.body;
 
@@ -58,8 +64,11 @@ export const updataCourse = async (req, res) => {
 
   try {
     // Find and update the course
-    const updatedCourse = await Course.findByIdAndUpdate(
-      courseId,
+    const updatedCourse = await Course.updateOne(
+      {
+      _id:courseId,
+      createrId:adminId
+      },
       {
         title,
         description,
@@ -88,9 +97,12 @@ export const updataCourse = async (req, res) => {
 // delete api
 
 export const deleteCourse = async (req,res)=>{
+  const adminId = req.adminId
   const {courseId} = req.params
  try {
-  const course = await Course.findOneAndDelete({_id:courseId},)
+  const course = await Course.findOneAndDelete({_id:courseId,
+    createrId:adminId
+  },)
   if(!course){
    return res.status(404).json({message:"course is not found"})
   }

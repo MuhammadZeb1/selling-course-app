@@ -1,22 +1,22 @@
-import user from "../models/userModel.js";
+// import user from "../models/userModel.js";
 import bcrypt ,{hash}from "bcryptjs";
 import { z } from "zod";
 import jwt from 'jsonwebtoken'
 import { config } from "dotenv";
-import Purchase from "../models/purchaseModel.js";
-import Course from "../models/courseModels.js";
+import Admin from "../models/adminModel.js";
+
 config()
 
 
 export const singup = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
-  const userSchema = z.object({
+  const adminSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Invalid email format"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
   });
-  const validateData = userSchema.safeParse(req.body);
+  const validateData = adminSchema.safeParse(req.body);
   if (!validateData.success) {
     return res
       .status(400)
@@ -25,18 +25,18 @@ export const singup = async (req, res) => {
 
   const hashPassowrd = await bcrypt.hash(password, 10);
   try {
-    const userExist = await user.findOne({ email: email });
-    if (userExist) {
-      return res.status(400).json({ message: "user alerady exist" });
+    const adminExist = await Admin.findOne({ email: email });
+    if (adminExist) {
+      return res.status(400).json({ message: "admin alerady exist" });
     }
-    const newUser = new user({
+    const newAdmin = new Admin({
       firstName,
       lastName,
       email,
       password: hashPassowrd,
     });
-    await newUser.save();
-    res.status(201).json(newUser);
+    await newAdmin.save();
+    res.status(201).json(newAdmin);
   } catch (error) {
     res.status(500).json({ error: "error in singup" });
     console.log("error", error);
@@ -46,19 +46,19 @@ export const singup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const userAvailable = await user.findOne({ email: email });
-    const hashPassowrdComp = await bcrypt.compare(password,userAvailable.password)
-    if (!userAvailable ||!hashPassowrdComp) {
+    const adminAvailable = await Admin.findOne({ email: email });
+    const hashPassowrdComp = await bcrypt.compare(password,adminAvailable.password)
+    if (!adminAvailable ||!hashPassowrdComp) {
       return res.status(403).json({ errors: "invalid credentials" });
     }
     // jwt code 
     const token = jwt.sign(
-      { id: userAvailable._id },
-      process.env.USER_PASSWORD  // ✅ یہ درست ہے
+      { id: adminAvailable._id },
+      process.env.ADMIN_PASSWORD  
     );
     res.cookie("jwt",token)
     
-    res.status(201).json({message:"login successfully",userAvailable,token})
+    res.status(201).json({message:"login successfully",adminAvailable,token})
   } catch (error) {
     res.status(500).json({ error: "error in login" });
     console.log(error);
@@ -67,9 +67,10 @@ export const login = async (req, res) => {
 
 export const logout = (req,res)=>{
  try {
-  if(!req.cookies.jwt ){
-      res.status(400).json({message:"singup first"})
-    }
+  if(!req.cookies.jwt
+  ){
+    res.status(400).json({message:"singup first"})
+  }
   res.clearCookie("jwt")
   res.status(200).json({message:"logout successfully"})
  } catch (error) {
@@ -77,24 +78,4 @@ export const logout = (req,res)=>{
   console.log(error);
   
  }
-}
-
-export const purchases =async (req,res )=>{
-  const userId = req.userId;
-  try {
-    const purchase = await Purchase.find()
-    let purchaseCourseId=[]
-    for (let i = 0;i<purchaseCourseId.length;i++){
-      purchaseCourseId.push(purchase[i].userId)
-    }
-    const courseData = await Course.find({
-      _id:{$in:purchaseCourseId},
-    })
-    res.status(200).json({purchase,courseData})
-  } catch (error) {
-    res.status()
-    console.log(error);
-    
-  }
-
 }
