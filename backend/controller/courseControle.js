@@ -1,13 +1,20 @@
 import Course from '../models/courseModels.js';
-import user from '../models/userModel.js'
+import User from '../models/userModel.js'
 import Purchase from '../models/purchaseModel.js';
 import { v2 as cloudinary } from 'cloudinary';
+import {mongoose  } from "mongoose";
 
 export const createCourse = async (req, res) => {
   const adminId = req.adminId
+  console.log("🚀 adminId:", adminId);
+ 
   const { title, description, price,  } = req.body;
-  const {image} = req.files
-  console.log("📦 req.body:", req.body);
+  console.log("jjj", title, description, price,);
+  
+  const {image} = req.files||{}
+  console.log("image",image);
+  
+  console.log("📦 req.body: the image ",req.body);
 
   
 
@@ -31,11 +38,13 @@ if (!cloud_response||cloud_response.error){
   return res.status(400).json({error:"error file uploading cloudery"})
 }
 
+console.log("hell");
 
     const newCourse = new Course({
        title, description, price, image:{public_id:cloud_response.public_id,url:cloud_response.url},
        createrId:adminId
        });
+       
     await newCourse.save();
 
     res.status(201).json({
@@ -54,8 +63,10 @@ if (!cloud_response||cloud_response.error){
 
 export const updataCourse = async (req, res) => {
   const admin = req.adminId
+  
   const { courseId } = req.params; // Get courseId from URL params
   const { title, description, price, image } = req.body;
+  console.log(admin,req.body,"kkkkk");
 
   // Check if courseId is a valid ObjectId
   if (!mongoose.Types.ObjectId.isValid(courseId)) {
@@ -67,7 +78,7 @@ export const updataCourse = async (req, res) => {
     const updatedCourse = await Course.updateOne(
       {
       _id:courseId,
-      createrId:adminId
+      createrId:admin
       },
       {
         title,

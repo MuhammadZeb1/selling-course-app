@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const adminjwt = (req, res, next) => {
+const userjwt = (req, res, next) => {
     const authHeaders = req.headers.authorization;
 
     // Check if Authorization header is present and correctly formatted
@@ -13,7 +13,7 @@ const adminjwt = (req, res, next) => {
 
     try {
         // Verify the token
-        const decoded = jwt.verify(token, process.env.ADMIN_PASSWORD);
+        const decoded = jwt.verify(token, process.env.USER_PASSWORD);
 
         // Store user ID in request object
         req.adminId = decoded.id;
@@ -27,4 +27,4 @@ const adminjwt = (req, res, next) => {
     }
 };
 
-export default adminjwt;
+export default userjwt;
