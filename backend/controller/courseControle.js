@@ -59,14 +59,12 @@ console.log("hell");
 };
 
 
-
-
 export const updataCourse = async (req, res) => {
   const admin = req.adminId
   
   const { courseId } = req.params; // Get courseId from URL params
   const { title, description, price, image } = req.body;
-  console.log(admin,req.body,"kkkkk");
+  
 
   // Check if courseId is a valid ObjectId
   if (!mongoose.Types.ObjectId.isValid(courseId)) {
@@ -74,6 +72,10 @@ export const updataCourse = async (req, res) => {
   }
 
   try {
+    const searchCourse = await Course.findById(courseId);
+    if (!searchCourse) {
+      return res.status(404).json({ message: "Course not found" });
+    }
     // Find and update the course
     const updatedCourse = await Course.updateOne(
       {

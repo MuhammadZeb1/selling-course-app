@@ -7,13 +7,23 @@ import adminRoute from './routes/adminRoute.js'
 import fileUpload from "express-fileupload";
 import { v2 as cloudinary } from 'cloudinary';
 import cookieParser from "cookie-parser";
+import cors from 'cors'
 
 
 dotenv.config();
 const app = express();
 app.use(express.json()); 
 app.use(cookieParser()); 
-
+app.use(fileUpload({
+  useTempFiles : true,
+  tempFileDir : '/tmp/'
+}));
+app.use(cors({
+  origin: process.env.FRONTEND_URL, 
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 const PORT = process.env.PORT || 5000;
 
 const dataBasa = process.env.DATABASE_URI
@@ -33,10 +43,6 @@ const connectDB = async () => {
 
 // Call the function to connect
 connectDB();
-app.use(fileUpload({
-  useTempFiles : true,
-  tempFileDir : '/tmp/'
-}));
 
 app.get('/', (req, res) => {
   res.send('Server is running!');
