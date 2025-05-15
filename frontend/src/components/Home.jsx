@@ -33,10 +33,11 @@ function Home() {
   var settings = {
     dots: true,
     infinite: false,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 4,
+    speed: 1000,
+    slidesToShow: 3,
+    slidesToScroll: 1,
     initialSlide: 0,
+    autoplay: true,
     responsive: [
       {
         breakpoint: 1024,
