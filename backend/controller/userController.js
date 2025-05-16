@@ -65,19 +65,15 @@ export const login = async (req, res) => {
   }
 };
 
-export const logout = (req,res)=>{
- try {
-  if(!req.cookies.jwt ){
-      res.status(400).json({message:"singup first"})
-    }
-  res.clearCookie("jwt")
-  res.status(200).json({message:"logout successfully"})
- } catch (error) {
-  res.status(500).json({error:"error in logout"})
-  console.log(error);
-  
- }
-}
+export const logout = (req, res) => {
+  try {
+    // No need to check for cookies since token is in localStorage
+    res.status(200).json({ message: "logout successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "error in logout" });
+    console.log(error);
+  }
+};
 
 export const purchases =async (req,res )=>{
   const userId = req.userId;

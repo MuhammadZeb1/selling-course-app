@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import book from "../assets/bookbook-logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,16 @@ function Signup() {
     password: "",
   });
   const [errormessage, seterrormessage] = useState("");
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (errormessage) {
+      const timer = setTimeout(() => {
+        seterrormessage("");
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [errormessage]);
 
   const handleChange = (e) => {
     setFormData((prevState) => ({
@@ -44,23 +55,25 @@ function Signup() {
         }
       );
       console.log("signup successfully!",response.data);
-      alert("signup successfully!");
+      toast.success("signup successfully!");
+      navigate("/login");
     }  catch (error) {
-  if (error.response) {
-    if (error.response.data.message) {
-      alert(error.response.data.message);
+      if (error.response) {
+        if (error.response.data.message) {
+          toast.success(error.response.data.message);
     }
 
     if (error.response.data.errors) {
-      alert(error.response.data.errors[0]); // صرف پہلا error دکھائیں
+      // alert(error.response.data.errors[0]); // صرف پہلا error دکھائیں
       console.error("Error request:", error.request);
     }
-
+    
     seterrormessage(error.response.data.errors?.[0] || "Signup failed");
   }
-
+  
   console.error("Error during signup:", error);
 }
+
 
     // Handle form submission here
 
@@ -82,10 +95,10 @@ function Signup() {
             Login
           </Link>
           <Link
-            to="/signup"
+            to="/courses"
             className="px-4 py-2 bg-transparent border border-blue-500 text-white rounded hover:bg-blue-500 hover:text-white transition duration-300"
           >
-            Signup
+            join now
           </Link>
         </div>
       </header>
@@ -106,7 +119,7 @@ function Signup() {
                 type="text"
                 name="firstName"
                 id="firstName"
-                value={formData.firstname}
+                value={formData.firstName}
                 onChange={handleChange}
                 className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
                 required
@@ -121,7 +134,7 @@ function Signup() {
                 type="text"
                 name="lastName"
                 id="lastName"
-                value={formData.lastname}
+                value={formData.lastName}
                 onChange={handleChange}
                 className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
                 required
@@ -157,6 +170,13 @@ function Signup() {
                 required
               />
             </div>
+            {
+              errormessage && (
+                <div className="text-red-500 text-center">
+                  {errormessage}
+                </div>
+              ) 
+            }
 
             <button
               type="submit"
