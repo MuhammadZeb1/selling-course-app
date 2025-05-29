@@ -1,47 +1,41 @@
 import book from "../assets/bookbook-logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaWhatsapp, FaGithub } from "react-icons/fa";
 import { CiLinkedin } from "react-icons/ci";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext"; // ✅ import context
 
 function Home() {
   const [course, setCourse] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("user");
-    setIsLoggedIn(!!token);
-  }, []);
+  // ✅ use context
+  const { isLoggedIn, logout } = useContext(AuthContext);
+  console.log(isLoggedIn);
 
- const handleLogout = async () => {
-  try {
-    await axios.get("http://localhost:3000/api/v1/user/logout", {
-      withCredentials: true,
-    });
+  const handleLogout = async () => {
+    try {
+      await axios.get("http://localhost:3000/api/v1/user/logout", {
+        withCredentials: true,
+      });
 
-    // Remove token from localStorage
-    localStorage.removeItem("user");
-
-    // Update UI state
-    setIsLoggedIn(false);
-    toast.success("Logout successfully!");
-  } catch (error) {
-    console.error("Logout error:", error);
-
-    const errorMessage =
-      error?.response?.data?.error ||
-      error?.response?.data?.message ||
-      "Logout failed. Please try again.";
-
-    toast.error(errorMessage);
-  }
-};
-
+      logout(); // ✅ use context logout
+      toast.success("Logout successfully!");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      const errorMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        "Logout failed. Please try again.";
+      toast.error(errorMessage);
+    }
+  };
 
   const getCourse = async () => {
     try {
@@ -52,6 +46,9 @@ function Home() {
       setCourse(response.data.courses);
     } catch (error) {
       console.log("Error fetching courses", error);
+      if (error.response?.status === 401) {
+        logout(); // ✅ also logout if unauthorized
+      }
     }
   };
 
@@ -125,12 +122,12 @@ function Home() {
             Learn from the best courses available online. Enroll now to grow your skills.
           </p>
           <div className="flex gap-4 justify-center">
-            <button className="px-6 py-3 bg-blue-600 rounded hover:bg-green-700 transition">
+            <Link to="/courses" className="px-6 py-3 bg-blue-600 rounded hover:bg-green-700 transition">
               Explore Courses
-            </button>
-            <button className="px-6 py-3 bg-blue-600 rounded hover:bg-green-700 transition">
+            </Link>
+            <Link to="https://www.youtube.com/results?search_query=mern+stack+react+node+mongodb+express" className="px-6 py-3 bg-blue-600 rounded hover:bg-green-700 transition">
               Course Videos
-            </button>
+            </Link>
           </div>
         </section>
 

@@ -45,52 +45,76 @@ export const singup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  
   try {
-    const userAvailable = await user.findOne({ email: email });
-    const hashPassowrdComp = await bcrypt.compare(password,userAvailable.password)
-    if (!userAvailable ||!hashPassowrdComp) {
-      return res.status(403).json({ errors: "invalid credentials" });
+    const userAvailable = await user.findOne({ email });
+    if (!userAvailable) {
+      return res.status(403).json({ error: "Invalid credentials" });
     }
-    // jwt code 
+
+    const isPasswordValid = await bcrypt.compare(password, userAvailable.password);
+    if (!isPasswordValid) {
+      return res.status(403).json({ error: "Invalid credentials" });
+    }
+
     const token = jwt.sign(
       { id: userAvailable._id },
-      process.env.USER_PASSWORD  // ✅ یہ درست ہے
+      process.env.USER_PASSWORD,
+      { expiresIn: '1d' }
     );
-    res.cookie("jwt",token)
-    
-    res.status(201).json({message:"login successfully",userAvailable,token})
+
+    // Cookie settings that work in development
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false, // Set to false for HTTP in development
+      sameSite: 'lax', // Works better than 'strict' for localhost
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+   res.status(200).json({ 
+  message: "Login successful",
+  token, // ✅ Add token here
+  user: {
+    id: userAvailable._id,
+    email: userAvailable.email
+  }
+});
+
   } catch (error) {
-    res.status(500).json({ error: "error in login" });
-    console.log(error);
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Server error during login" });
   }
 };
 
 export const logout = (req, res) => {
   try {
-    // No need to check for cookies since token is in localStorage
+    // Clear the cookie
+    res.clearCookie("jwt");
     res.status(200).json({ message: "logout successfully" });
   } catch (error) {
     res.status(500).json({ error: "error in logout" });
     console.log(error);
   }
 };
-
-export const purchases =async (req,res )=>{
+export const purchases = async (req, res) => {
   const userId = req.userId;
-  try {
-    const purchase = await Purchase.find()
-    let purchaseCourseId=[]
-    for (let i = 0;i<purchaseCourseId.length;i++){
-      purchaseCourseId.push(purchase[i].userId)
-    }
-    const courseData = await Course.find({
-      _id:{$in:purchaseCourseId},
-    })
-    res.status(200).json({purchase,courseData})
-  } catch (error) {
-    res.status()
-    console.log(error);
-    
-  }
 
-}
+  try {
+    // ✅ Find purchases for the current user
+    const purchase = await Purchase.find({ userId });
+
+    // ✅ Extract courseIds from the purchases
+    const purchaseCourseIds = purchase.map(p => p.courseId);
+
+    // ✅ Get course details from those IDs
+    const courseData = await Course.find({
+      _id: { $in: purchaseCourseIds }
+    });
+
+    res.status(200).json({ purchases: courseData });
+  } catch (error) {
+    console.log("Error in fetching purchases", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+

@@ -15,7 +15,7 @@ const courseSchema = new mongoose.Schema({
   },
   createrId:{
     type: mongoose.Schema.Types.ObjectId,
-  ref: 'admin',  // یہ وہی 'admin' ہونا چاہیے جو آپ نے model میں define کیا ہے
+  ref: 'admin', 
   required: true
   }
 });

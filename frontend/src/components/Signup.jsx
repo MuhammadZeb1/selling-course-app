@@ -13,6 +13,7 @@ function Signup() {
   });
   const [errormessage, seterrormessage] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     if (errormessage) {
       const timer = setTimeout(() => {
@@ -54,26 +55,26 @@ function Signup() {
           },
         }
       );
-      console.log("signup successfully!",response.data);
+      console.log("signup successfully!", response.data);
       toast.success("signup successfully!");
+      localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/login");
-    }  catch (error) {
+    } catch (error) {
       if (error.response) {
         if (error.response.data.message) {
           toast.success(error.response.data.message);
-    }
+        }
 
-    if (error.response.data.errors) {
-      // alert(error.response.data.errors[0]); // صرف پہلا error دکھائیں
-      console.error("Error request:", error.request);
-    }
-    
-    seterrormessage(error.response.data.errors?.[0] || "Signup failed");
-  }
-  
-  console.error("Error during signup:", error);
-}
+        if (error.response.data.errors) {
+          // alert(error.response.data.errors[0]); // صرف پہلا error دکھائیں
+          console.error("Error request:", error.request);
+        }
 
+        seterrormessage(error.response.data.errors?.[0] || "Signup failed");
+      }
+
+      console.error("Error during signup:", error);
+    }
 
     // Handle form submission here
 
@@ -170,13 +171,9 @@ function Signup() {
                 required
               />
             </div>
-            {
-              errormessage && (
-                <div className="text-red-500 text-center">
-                  {errormessage}
-                </div>
-              ) 
-            }
+            {errormessage && (
+              <div className="text-red-500 text-center">{errormessage}</div>
+            )}
 
             <button
               type="submit"
