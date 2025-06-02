@@ -1,29 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import book from "../assets/bookbook-logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-
 import toast from "react-hot-toast";
 
-function Login() {
-  const { login } = useContext(AuthContext);
-
+function AdminSignup() {
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
   });
   const [errormessage, seterrormessage] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
     if (errormessage) {
       const timer = setTimeout(() => {
         seterrormessage("");
-      }, 3000); // Increased timeout to 3 seconds for better UX
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
@@ -35,15 +30,21 @@ function Login() {
       [e.target.name]: e.target.value,
     }));
   };
+  console.log(
+    formData.firstName,
+    formData.lastName,
+    formData.email,
+    formData.password
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/user/login",
+        "http://localhost:3000/api/v1/admin/singup",
         {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
         },
@@ -54,44 +55,30 @@ function Login() {
           },
         }
       );
-     
-      
-      console.log("Login successful!", response.data);
-      toast.success("Login successful!");
-      
-      
-      localStorage.setItem("email", response.data.user.email);
-      console.log("User email stored in localStorage:", response.data.user.email);
+      console.log("signup successfully!", response.data);
+      toast.success("signup successfully!");
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      
-     login(response.data.token, response.data.user, 'user');
-
-      console.log("User logged in:", response.data.user);
-      
-
-      navigate("/");
+      navigate("/admin/login");
     } catch (error) {
-      console.error("Login error:", error);
-
       if (error.response) {
-        console.error("Server response:", error.response.data);
-        if (error.response.status === 500) {
-          seterrormessage("Server error - please try again later");
-        } else {
-          seterrormessage(
-            error.response.data.error ||
-              error.response.data.message ||
-              "Login failed. Please check your credentials."
-          );
+        if (error.response.data.message) {
+          toast.success(error.response.data.message);
         }
-      } else if (error.request) {
-        seterrormessage("Network error - please check your connection");
-      } else {
-        seterrormessage("An unexpected error occurred");
+
+        if (error.response.data.errors) {
+          // alert(error.response.data.errors[0]); // صرف پہلا error دکھائیں
+          console.error("Error request:", error.request);
+        }
+
+        seterrormessage(error.response.data.errors?.[0] || "Signup failed");
       }
-    } finally {
-      setIsSubmitting(false);
+
+      console.error("Error during signup:", error);
     }
+
+    // Handle form submission here
+
+    console.log(formData);
   };
 
   return (
@@ -103,30 +90,58 @@ function Login() {
         </div>
         <div className="flex gap-4">
           <Link
-            to="/signup"
+            to="/admin/login"
             className="px-4 py-2 bg-transparent border border-blue-500 text-white rounded hover:bg-blue-500 hover:text-white transition duration-300"
           >
-            Signup
+            Login
           </Link>
           <Link
             to="/courses"
             className="px-4 py-2 bg-transparent border border-blue-500 text-white rounded hover:bg-blue-500 hover:text-white transition duration-300"
           >
-            Join now
+            join now
           </Link>
         </div>
       </header>
 
-      <div className="flex items-center justify-center p-3">
+      {/* Simple Signup Form */}
+      <div className="flex items-center justify-center p-2">
         <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-700">
           <h2 className="text-2xl font-bold mb-1 text-center text-white">
-            Login
+            Admin Signup
           </h2>
-          <p className="text-center text-white font-bold mt-2">
-            Login to access the paid courses
-          </p>
-
+            <p className="text-gray-200 text-center font-bold">just signup to mess with dashboard</p>
           <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+            <div>
+              <label className="block text-gray-300 mb-1" htmlFor="firstname">
+                Firstname
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                id="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-300 mb-1" htmlFor="lastname">
+                Lastname
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                id="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
+                required
+              />
+            </div>
+
             <div>
               <label className="block text-gray-300 mb-1" htmlFor="email">
                 Email
@@ -139,9 +154,9 @@ function Login() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
                 required
-                disabled={isSubmitting}
               />
             </div>
+
             <div>
               <label className="block text-gray-300 mb-1" htmlFor="password">
                 Password
@@ -154,24 +169,17 @@ function Login() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 hover:scale-y-105 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-1 focus:ring-blue-500 transition-transform"
                 required
-                disabled={isSubmitting}
               />
             </div>
-
             {errormessage && (
-              <div className="text-red-500 text-center mt-2 animate-pulse">
-                {errormessage}
-              </div>
+              <div className="text-red-500 text-center">{errormessage}</div>
             )}
 
             <button
               type="submit"
-              className={`w-full hover:scale-y-105 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300 font-medium mt-4 ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={isSubmitting}
+              className="w-full hover:scale-y-105 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-300 font-medium mt-4"
             >
-              {isSubmitting ? "Logging in..." : "Login"}
+              Admin Signup
             </button>
           </form>
         </div>
@@ -180,4 +188,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default AdminSignup;

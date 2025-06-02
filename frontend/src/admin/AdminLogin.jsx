@@ -7,7 +7,7 @@ import { AuthContext } from "../context/AuthContext";
 
 import toast from "react-hot-toast";
 
-function Login() {
+function AdminLogin() {
   const { login } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
@@ -42,7 +42,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/user/login",
+        "http://localhost:3000/api/v1/admin/login",
         {
           email: formData.email,
           password: formData.password,
@@ -54,22 +54,22 @@ function Login() {
           },
         }
       );
-     
-      
+
       console.log("Login successful!", response.data);
+      console.log("Token:", response.data.token);
       toast.success("Login successful!");
-      
-      
-      localStorage.setItem("email", response.data.user.email);
-      console.log("User email stored in localStorage:", response.data.user.email);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      
-     login(response.data.token, response.data.user, 'user');
 
-      console.log("User logged in:", response.data.user);
-      
+      const adminWithRole = {
+        ...response.data.adminAvailable,
+        role: "admin", // ✅ inject role manually
+      };
 
-      navigate("/");
+      localStorage.setItem("user", JSON.stringify(adminWithRole)); // ✅ update this
+      login(response.data.token, adminWithRole, "admin"); // ✅ same here
+
+      console.log("admin login successful:", response.data.adminAvailable);
+
+      navigate("/admin/dashboard");
     } catch (error) {
       console.error("Login error:", error);
 
@@ -103,7 +103,7 @@ function Login() {
         </div>
         <div className="flex gap-4">
           <Link
-            to="/signup"
+            to="/admin/signup"
             className="px-4 py-2 bg-transparent border border-blue-500 text-white rounded hover:bg-blue-500 hover:text-white transition duration-300"
           >
             Signup
@@ -120,10 +120,10 @@ function Login() {
       <div className="flex items-center justify-center p-3">
         <div className="bg-gray-900 p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-700">
           <h2 className="text-2xl font-bold mb-1 text-center text-white">
-            Login
+            Admin Login
           </h2>
           <p className="text-center text-white font-bold mt-2">
-            Login to access the paid courses
+            Login to access the admin dashboard
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-6">
@@ -171,7 +171,7 @@ function Login() {
               }`}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Logging in..." : "Login"}
+              {isSubmitting ? "Logging in..." : "Admin Login"}
             </button>
           </form>
         </div>
@@ -180,4 +180,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default AdminLogin;

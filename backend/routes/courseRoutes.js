@@ -1,12 +1,13 @@
 import express from 'express';
 
+
 import {
   buyCourse,
   courseDetail,
   createCourse,
   deleteCourse,
   getCourse,
-  updataCourse,
+  updateCourse,
 } from '../controller/courseControle.js';
 
 import userjwt from '../middleware/userjwt.js';
@@ -15,7 +16,7 @@ import adminjwt from '../middleware/adminjwt.js';
 const router = express.Router();
 
 router.post("/create", adminjwt, createCourse);
-router.put("/updata/:courseId", adminjwt, updataCourse);
+router.put("/update/:courseId", adminjwt, updateCourse);
 router.delete("/delete/:courseId", adminjwt, deleteCourse);
 
 // ✅ static route first

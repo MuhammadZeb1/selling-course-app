@@ -1,6 +1,9 @@
 import Stripe from "stripe";
+import mongoose from "mongoose";
 import Course from "../models/courseModels.js";
 import Purchase from "../models/purchaseModel.js";
+ import { v2 as cloudinary } from "cloudinary";
+
 import dotenv from "dotenv";
 dotenv.config();
 import Config from "../config/config.js";
@@ -64,7 +67,7 @@ export const createCourse = async (req, res) => {
   }
 };
 
-export const updataCourse = async (req, res) => {
+export const updateCourse = async (req, res) => {
   const admin = req.adminId;
 
   const { courseId } = req.params; // Get courseId from URL params
@@ -81,7 +84,7 @@ export const updataCourse = async (req, res) => {
       return res.status(404).json({ message: "Course not found" });
     }
     // Find and update the course
-    const updatedCourse = await Course.updateOne(
+    const updatedCourse = await Course.findOneAndUpdate(
       {
         _id: courseId,
         createrId: admin,
@@ -97,10 +100,8 @@ export const updataCourse = async (req, res) => {
       },
       { new: true } // Return the updated course
     );
-
-    // Check if the course exists
     if (!updatedCourse) {
-      return res.status(404).json({ message: "Course not found" });
+      return res.status(404).json({ message: "Course not found or created by another admin" });
     }
 
     // Return success response
@@ -122,12 +123,12 @@ export const deleteCourse = async (req, res) => {
       createrId: adminId,
     });
     if (!course) {
-      return res.status(404).json({ message: "course is not found" });
+      return res.status(404).json({ message: "Course not found or created by another admin" });
     }
-    res.status(202).json({ message: "course is delete successfully" });
+    res.status(202).json({ message: "Course deleted successfully" });
   } catch (error) {
     console.log(error);
-    console.log("error occur", error);
+    console.log("Error occurred:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
